@@ -1,26 +1,234 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens.  Light theme is the default; `.dark` on <html> flips them.
+   Tailwind reads them through `@theme inline` so `bg-surface`, `text-muted`,
+   `border-line` etc. stay theme-aware without duplicating utilities.
+--------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #f1f3f7;
+  --surface-3: #e7eaf0;
+  --line: #dde1e9;
+  --line-strong: #c6ccd8;
+  --fg: #14161c;
+  --muted: #5b6274;
+  --faint: #858c9c;
+
+  --accent: #17864a;
+  --accent-fg: #ffffff;
+  --accent-soft: #e6f5ec;
+
+  --info: #1d63c7;
+  --info-soft: #e5eefc;
+  --warn: #a5670a;
+  --warn-soft: #fdf2dc;
+  --danger: #c02b2b;
+  --danger-soft: #fdeaea;
+  --violet: #6d3fd1;
+  --violet-soft: #efe9fd;
+
+  --code-bg: #0f1219;
+  --code-fg: #dfe3ec;
+
+  --shadow-sm: 0 1px 2px rgb(16 20 30 / 0.06), 0 1px 1px rgb(16 20 30 / 0.04);
+  --shadow-md: 0 6px 20px -6px rgb(16 20 30 / 0.14), 0 2px 6px -2px rgb(16 20 30 / 0.08);
+}
+
+.dark {
+  --bg: #0b0e14;
+  --surface: #11151d;
+  --surface-2: #171c26;
+  --surface-3: #1f2531;
+  --line: #232a36;
+  --line-strong: #333c4c;
+  --fg: #e7ebf3;
+  --muted: #9aa3b5;
+  --faint: #6b7385;
+
+  --accent: #34d17c;
+  --accent-fg: #06210f;
+  --accent-soft: #12281c;
+
+  --info: #6aa9ff;
+  --info-soft: #12203a;
+  --warn: #e3b341;
+  --warn-soft: #2a2213;
+  --danger: #ff6b6b;
+  --danger-soft: #2e1717;
+  --violet: #b18cff;
+  --violet-soft: #201a35;
+
+  --code-bg: #0d1017;
+  --code-fg: #dfe3ec;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 10px 30px -10px rgb(0 0 0 / 0.6);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-violet: var(--violet);
+  --color-violet-soft: var(--violet-soft);
+
+  --color-code-bg: var(--code-bg);
+  --color-code-fg: var(--code-fg);
+
+  --font-sans: var(--font-sans-stack);
+  --font-mono: var(--font-mono-stack);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  /* System stacks only — no webfont fetch, so builds work offline and the
+     first paint never waits on a font. */
+  --font-sans-stack: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono-stack: ui-monospace, "SFMono-Regular", "JetBrains Mono",
+    "Cascadia Code", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans-stack);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  border-color: var(--line);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Thin, unobtrusive scrollbars inside panels. */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Subtle grid used behind the landing hero. */
+.grid-backdrop {
+  background-image: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--line) 70%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--line) 70%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+
+.prose-lesson :where(p) {
+  margin-block: 0.85rem;
+  line-height: 1.75;
+  color: var(--fg);
+}
+.prose-lesson :where(ul) {
+  margin-block: 0.85rem;
+  padding-inline-start: 1.25rem;
+  list-style: disc;
+}
+.prose-lesson :where(li) {
+  margin-block: 0.35rem;
+  line-height: 1.7;
+}
+.prose-lesson :where(strong) {
+  font-weight: 650;
+}
+/* Inline code only. Code inside a <pre> is styled by the CodeBlock component,
+   so this is scoped to the elements that can carry inline markup. */
+.prose-lesson :where(p, li, td, th) code {
+  font-family: var(--font-mono-stack);
+  font-size: 0.86em;
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  padding: 0.08em 0.34em;
+  border-radius: 5px;
+}
+
+@keyframes pa-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-fade-up {
+  animation: pa-fade-up 0.35s ease both;
+}
+
+@keyframes pa-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+.animate-pulse-ring {
+  animation: pa-pulse-ring 1s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
