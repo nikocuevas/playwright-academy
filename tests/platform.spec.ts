@@ -127,6 +127,27 @@ test.describe("Playwright playground", () => {
     await expect(page.getByText("Terms accepted.")).toBeVisible();
     await expect(page.getByText("Solved")).toBeVisible();
   });
+
+  test("the simulated Country dropdown opens and lists its options", async ({
+    page,
+  }) => {
+    await page.goto("/playground?scenario=select");
+
+    const country = page.getByRole("combobox", { name: "Country" });
+    await expect(country).toHaveAttribute("aria-expanded", "false");
+
+    await country.click();
+
+    const options = page.getByRole("listbox", { name: "Country" });
+    await expect(options).toBeVisible();
+    await expect(options.getByRole("option")).toHaveCount(7);
+    await expect(options.getByRole("option", { name: /Canada/ })).toContainText(
+      'value="CA"',
+    );
+
+    await page.keyboard.press("Escape");
+    await expect(options).toBeHidden();
+  });
 });
 
 test.describe("SQL Lab", () => {
