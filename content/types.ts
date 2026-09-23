@@ -96,6 +96,6 @@ export type Module = {
   difficulty: Difficulty;
   /** Lucide icon name, resolved in the UI. */
   icon: string;
-  track: "foundations" | "core" | "architecture" | "integration" | "data" | "capstone";
+  track: "foundations" | "core" | "architecture" | "integration" | "data" | "capstone" | "igaming";
   lessons: Lesson[];
 };

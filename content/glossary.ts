@@ -1,6 +1,6 @@
 export type GlossaryTerm = {
   term: string;
-  category: "Playwright" | "QA" | "Web" | "Data";
+  category: "Playwright" | "QA" | "Web" | "Data" | "iGaming";
   definition: string;
   seeAlso?: string[];
   href?: string;
@@ -220,6 +220,189 @@ export const glossary: GlossaryTerm[] = [
       "A function that folds many rows into one value — COUNT, SUM, AVG, MIN, MAX. Filter aggregates with HAVING, not WHERE.",
     href: "/learn/sql-for-testers/group-by-and-aggregates",
   },
+  {
+    term: "iGaming",
+    category: "iGaming",
+    definition:
+      "Interactive gambling delivered online — sportsbook betting, casino games, and everything around them (wallets, KYC, responsible gambling). Educational usage here: entirely synthetic players, currency and outcomes.",
+    seeAlso: ["Sportsbook", "Casino"],
+    href: "/learn/igaming-qa/introduction-to-igaming-qa",
+  },
+  {
+    term: "Sportsbook",
+    category: "iGaming",
+    definition:
+      "The part of a gambling platform offering bets on real-world sporting and event outcomes, as opposed to the casino (slots and table games).",
+    seeAlso: ["Casino", "Bet"],
+    href: "/learn/igaming-qa/understanding-an-online-gambling-platform",
+  },
+  {
+    term: "Casino",
+    category: "iGaming",
+    definition:
+      "The part of a gambling platform offering slots, table and live-dealer games, each played in rounds rather than settled against a real-world event.",
+    seeAlso: ["RTP", "Sportsbook"],
+    href: "/learn/igaming-qa/casino-and-game-testing",
+  },
+  {
+    term: "Bet",
+    category: "iGaming",
+    definition:
+      "A player's wager on an outcome. Moves through a state machine — typically CREATED/ACCEPTED, then SETTLED, VOIDED or REJECTED — and QA's job is to prove the invalid transitions are actually blocked, not just the valid ones.",
+    seeAlso: ["Stake", "Odds", "Settlement", "Void"],
+    href: "/learn/igaming-qa/betting-and-bet-placement",
+  },
+  {
+    term: "Stake",
+    category: "iGaming",
+    definition:
+      "The amount a player risks on a bet. Must never exceed the wallet's available balance, and the debit should be atomic with bet creation.",
+    seeAlso: ["Bet", "Wallet"],
+    href: "/learn/igaming-qa/betting-and-bet-placement",
+  },
+  {
+    term: "Odds",
+    category: "iGaming",
+    definition:
+      "The multiplier applied to a stake to compute a winning payout. Decimal odds of 2.5 on a $10 stake return $25 if the bet wins.",
+    seeAlso: ["Bet", "Settlement"],
+    href: "/learn/igaming-qa/betting-and-bet-placement",
+  },
+  {
+    term: "Settlement",
+    category: "iGaming",
+    definition:
+      "The process of resolving a bet's outcome and crediting any payout. A settlement should be idempotent — attempting to re-settle an already-settled bet must be rejected, not re-applied.",
+    seeAlso: ["Bet", "Idempotency", "Ledger"],
+    href: "/learn/igaming-qa/bet-settlement-and-payouts",
+  },
+  {
+    term: "Void",
+    category: "iGaming",
+    definition:
+      "A bet cancelled after acceptance (a market error, a postponed event), refunding the stake rather than settling to a win or loss.",
+    seeAlso: ["Bet", "Settlement"],
+    href: "/learn/igaming-qa/betting-and-bet-placement",
+  },
+  {
+    term: "Wallet",
+    category: "iGaming",
+    definition:
+      "A player's balances — cash, bonus and pending — held separately even though the UI often shows one combined number. Cash and bonus balance are different currencies with the same symbol.",
+    seeAlso: ["Ledger", "Bonus balance"],
+    href: "/learn/igaming-qa/wallets-and-financial-transactions",
+  },
+  {
+    term: "Ledger",
+    category: "iGaming",
+    definition:
+      "The append-only transaction history behind a wallet balance. The stored balance should always equal the sum of the ledger; when it doesn't, that's a reconciliation bug, not a UI bug.",
+    seeAlso: ["Wallet", "Reconciliation"],
+    href: "/learn/igaming-qa/database-and-ledger-validation",
+  },
+  {
+    term: "Bonus balance",
+    category: "iGaming",
+    definition:
+      "Promotional funds held separately from cash, usually restricted from withdrawal until a wagering requirement is met.",
+    seeAlso: ["Wagering requirement", "Wallet"],
+    href: "/learn/igaming-qa/bonuses-and-promotions",
+  },
+  {
+    term: "Wagering requirement",
+    category: "iGaming",
+    definition:
+      "The total amount a player must stake before a bonus (or its winnings) becomes withdrawable — for example, a $20 bonus with a 10x requirement needs $200 wagered.",
+    seeAlso: ["Bonus balance"],
+    href: "/learn/igaming-qa/bonuses-and-promotions",
+  },
+  {
+    term: "KYC",
+    category: "iGaming",
+    definition:
+      "Know Your Customer — identity and age verification a player must pass before gambling with real money. QA validates every outcome state (verified, failed, pending, manual review), not just the happy path.",
+    seeAlso: ["AML", "Geolocation"],
+    href: "/learn/igaming-qa/age-verification-and-kyc",
+  },
+  {
+    term: "AML",
+    category: "iGaming",
+    definition:
+      "Anti-Money Laundering — controls that flag unusual financial patterns for review. QA's role is validating that the controls fire and degrade safely, not attempting to bypass them.",
+    seeAlso: ["KYC", "Risk engine"],
+    href: "/learn/igaming-qa/risk-and-fraud-testing",
+  },
+  {
+    term: "Self-exclusion",
+    category: "iGaming",
+    definition:
+      "A player-initiated block on their own account, which the platform must honor immediately and everywhere — login, betting, deposits, casino — including for a session already open when it takes effect.",
+    seeAlso: ["Responsible gambling", "Cooling-off"],
+    href: "/learn/igaming-qa/self-exclusion-and-player-protection",
+  },
+  {
+    term: "Cooling-off",
+    category: "iGaming",
+    definition:
+      "A short, player-set break from the platform, distinct from self-exclusion in duration and (usually) reversibility.",
+    seeAlso: ["Self-exclusion", "Responsible gambling"],
+    href: "/learn/igaming-qa/responsible-gambling",
+  },
+  {
+    term: "Responsible gambling",
+    category: "iGaming",
+    definition:
+      "The set of player-protection controls — deposit limits, loss limits, cooling-off, self-exclusion — a platform must enforce, not merely offer as a setting.",
+    seeAlso: ["Self-exclusion", "Cooling-off"],
+    href: "/learn/igaming-qa/responsible-gambling",
+  },
+  {
+    term: "Geolocation",
+    category: "iGaming",
+    definition:
+      "Verification of a player's physical location, used to allow or block gambling by territory. A business-critical control, not a UX nicety — it must re-check periodically, not just once at login.",
+    seeAlso: ["KYC"],
+    href: "/learn/igaming-qa/geolocation-and-restricted-territories",
+  },
+  {
+    term: "Risk engine",
+    category: "iGaming",
+    definition:
+      "The system that scores accounts and transactions for fraud or abuse risk. QA's concern is behavioral: does it fire, does it degrade safely on timeout, and is fail-open ever the wrong default.",
+    seeAlso: ["AML"],
+    href: "/learn/igaming-qa/risk-and-fraud-testing",
+  },
+  {
+    term: "Payment callback",
+    category: "iGaming",
+    definition:
+      "A webhook from a payment provider confirming a deposit or withdrawal outcome. Providers retry callbacks, so the handler must be idempotent or the same payment gets applied twice.",
+    seeAlso: ["Idempotency", "Reconciliation"],
+    href: "/learn/igaming-qa/deposits-and-withdrawals",
+  },
+  {
+    term: "Idempotency",
+    category: "iGaming",
+    definition:
+      "The property that repeating the same request (with the same idempotency key) produces the same result once, not once per attempt. The direct fix for duplicate bets, duplicate deposits and duplicate settlements.",
+    seeAlso: ["Payment callback", "Settlement"],
+    href: "/learn/igaming-qa/idempotency-and-duplicate-transactions",
+  },
+  {
+    term: "Reconciliation",
+    category: "iGaming",
+    definition:
+      "Proving a stored balance equals the sum of its transaction history. A wallet that doesn't reconcile is a defect regardless of what the UI shows.",
+    seeAlso: ["Ledger"],
+    href: "/learn/igaming-qa/database-and-ledger-validation",
+  },
+  {
+    term: "RTP",
+    category: "iGaming",
+    definition:
+      "Return to Player — a casino game's theoretical long-run payout percentage. QA validates that game round outcomes are recorded and settled correctly; RTP fairness itself is outside QA's scope.",
+    href: "/learn/igaming-qa/casino-and-game-testing",
+  },
 ];
 
-export const glossaryCategories = ["Playwright", "QA", "Web", "Data"] as const;
+export const glossaryCategories = ["Playwright", "QA", "Web", "Data", "iGaming"] as const;

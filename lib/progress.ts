@@ -24,6 +24,9 @@ export type ProgressState = {
   quizzes: Record<string, QuizResult>; // lessonId -> result
   challenges: Record<string, string>; // challengeId -> ISO completedAt
   sql: Record<string, string>; // sql exercise id -> ISO completedAt
+  /** Kept separate from `sql` so the iGaming SQL Lab's own exercise count never
+   * skews the ShopEasy SQL Lab's "done / total" stats on the dashboard and homepage. */
+  igamingSql: Record<string, string>; // igaming sql exercise id -> ISO completedAt
   capstone: Record<string, string>; // capstone task id -> ISO completedAt
   bookmarks: string[];
 };
@@ -33,6 +36,7 @@ export const emptyProgress: ProgressState = {
   quizzes: {},
   challenges: {},
   sql: {},
+  igamingSql: {},
   capstone: {},
   bookmarks: [],
 };
@@ -124,6 +128,11 @@ export const progressStore = {
     const s = read();
     if (s.sql[id]) return;
     write({ ...s, sql: { ...s.sql, [id]: new Date().toISOString() } });
+  },
+  completeIgamingSql(id: string) {
+    const s = read();
+    if (s.igamingSql[id]) return;
+    write({ ...s, igamingSql: { ...s.igamingSql, [id]: new Date().toISOString() } });
   },
   toggleCapstone(id: string) {
     const s = read();

@@ -9,7 +9,7 @@ import { modules, allLessons, totalEstimatedMinutes } from "@/content/modules";
 export const metadata: Metadata = {
   title: "Curriculum",
   description:
-    "Sixteen modules from JavaScript fundamentals to a full QA automation capstone.",
+    "Seventeen modules from JavaScript fundamentals to a full QA automation capstone, plus an iGaming QA specialization.",
 };
 
 const trackLabel: Record<string, string> = {
@@ -19,6 +19,7 @@ const trackLabel: Record<string, string> = {
   integration: "Integration",
   data: "Data",
   capstone: "Capstone",
+  igaming: "iGaming",
 };
 
 export default function LearnPage() {

@@ -22,16 +22,43 @@ export type QueryResult = {
   notice?: string;
 };
 
-export function executeSql(sql: string): QueryResult {
-  const started = performance.now();
-  const query = parseSql(sql);
-  const scopes = buildScopes(query);
-  const result = runQuery(query, scopes);
+/** The table lookup an `executeSql` call resolves `FROM`/`JOIN` names against. */
+export type TableSource = { getTable: typeof getTable; tableNames: string[] };
 
-  return {
-    ...result,
-    durationMs: Math.max(0.1, Math.round((performance.now() - started) * 10) / 10),
-  };
+const defaultSource: TableSource = { getTable, tableNames };
+
+/**
+ * The table source for the query currently being executed. `executeSql` is
+ * synchronous end-to-end (including nested subqueries via `runSubquery`), so
+ * a single module-level slot — set on entry and restored on exit — is enough
+ * to make `resolveTable` dataset-aware without threading a parameter through
+ * every internal function.
+ */
+let activeSource: TableSource = defaultSource;
+
+/**
+ * Runs a query against a table source. Defaults to the ShopEasy dataset, so
+ * every existing zero-argument call site is unaffected; pass a different
+ * `TableSource` (e.g. the iGaming dataset's `getIgamingTable`/`igamingTableNames`)
+ * to run the same engine over a different dataset.
+ */
+export function executeSql(sql: string, source: TableSource = defaultSource): QueryResult {
+  const started = performance.now();
+  const previousSource = activeSource;
+  activeSource = source;
+
+  try {
+    const query = parseSql(sql);
+    const scopes = buildScopes(query);
+    const result = runQuery(query, scopes);
+
+    return {
+      ...result,
+      durationMs: Math.max(0.1, Math.round((performance.now() - started) * 10) / 10),
+    };
+  } finally {
+    activeSource = previousSource;
+  }
 }
 
 function buildScopes(query: Query): Scope[] {
@@ -70,12 +97,12 @@ function buildScopes(query: Query): Scope[] {
 }
 
 function resolveTable(name: string) {
-  const table = getTable(name);
+  const table = activeSource.getTable(name);
   if (!table) {
     throw new SqlError(
       `Unknown table "${name}"`,
       undefined,
-      `Available tables: ${tableNames.join(", ")}.`,
+      `Available tables: ${activeSource.tableNames.join(", ")}.`,
     );
   }
   return table;
