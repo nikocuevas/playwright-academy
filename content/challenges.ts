@@ -3,7 +3,7 @@ import { scenarios } from "@/lib/playwright-simulator/scenarios";
 export type Challenge = {
   id: string;
   title: string;
-  track: "Locators" | "Actions" | "Assertions" | "Waiting" | "E2E" | "Auth" | "API" | "Network" | "Architecture" | "SQL" | "iGaming";
+  track: "Locators" | "Actions" | "Assertions" | "Waiting" | "E2E" | "Auth" | "API" | "Network" | "Architecture" | "SQL" | "iGaming" | "Casino";
   difficulty: "beginner" | "intermediate" | "advanced" | "expert";
   problem: string;
   /** Where the learner solves it. */
@@ -803,7 +803,165 @@ test('two concurrent bets cannot both succeed if their combined stake exceeds th
   }),
 ];
 
-export const challenges: Challenge[] = [...playgroundChallenges, ...localChallenges, ...igamingChallenges];
+/** Challenges for the Casino QA Lab (European Roulette) — solved against /practice/casino-roulette and /practice/casino-roulette-sql. */
+const casinoChallenges: Challenge[] = [
+  local({
+    id: "cr-ch-red-bet",
+    title: "Place a red bet and verify it appears",
+    track: "Casino",
+    difficulty: "beginner",
+    problem:
+      "At /practice/casino-roulette, place a 100-credit Red bet and verify: the balance drops to 900 immediately (before spinning), and the current-bet display reflects a Red bet of 100.",
+    starter: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('placing a red bet updates balance and current bet', async ({ roulettePage }) => {
+  await roulettePage.open();
+  // TODO: place the bet, then assert balance and current-bet
+});`,
+    solution: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('placing a red bet updates balance and current bet', async ({ roulettePage }) => {
+  await roulettePage.open();
+  await roulettePage.placeBetOf('red', 100);
+
+  await expect(roulettePage.balance).toHaveText('900 credits');
+  await expect(roulettePage.currentBet).toContainText(/red/i);
+  await expect(roulettePage.currentBet).toContainText('100');
+});`,
+    hints: [
+      "The stake is deducted at bet placement, not at spin — assert the balance right after placing the bet.",
+      "`data-testid=\"current-bet\"` reflects whatever is staged for the round in progress.",
+    ],
+    explanation:
+      "This is the module's simplest test, and it already checks the one fact every later lesson builds on: the stake leaves the balance the moment the bet is placed.",
+  }),
+  local({
+    id: "cr-ch-force-red-win",
+    title: "Force a result and verify a winning Red bet",
+    track: "Casino",
+    difficulty: "intermediate",
+    problem:
+      "Place a 100-credit Red bet, force the spin result to 1 (a red number), spin, and verify: winning number is 1, winning color is red, the result message indicates a win, the payout is 200, and the final balance is 1100.",
+    starter: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('a forced red result wins a red bet', async ({ roulettePage }) => {
+  await roulettePage.open();
+  // TODO: place the bet, force result 1, spin, assert every affected field
+});`,
+    solution: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('a forced red result wins a red bet', async ({ roulettePage }) => {
+  await roulettePage.open();
+  await roulettePage.placeBetOf('red', 100);
+  await roulettePage.forceResult(1);
+  await roulettePage.spin();
+
+  await expect(roulettePage.winningNumber).toHaveText('1');
+  await expect(roulettePage.winningColor).toHaveText(/red/i);
+  await expect(roulettePage.gameResult).toContainText(/win/i);
+  await expect(roulettePage.payout).toHaveText('200');
+  await expect(roulettePage.balance).toHaveText('1,100 credits');
+});`,
+    hints: [
+      "forceResult must run before spin — it's consumed by the very next spin.",
+      "1 is red; 17 is black — double-check the actual red/black sets rather than assuming.",
+      "payout on an even-money win is stake + profit = 2 × stake, not just the profit.",
+    ],
+    explanation:
+      "Forcing the result turns a ~48% chance into a certainty, which is what makes every one of these fields assertable instead of merely hoped for.",
+  }),
+  local({
+    id: "cr-ch-full-lifecycle",
+    title: "Verify the complete balance and payout lifecycle through UI and API",
+    track: "Casino",
+    difficulty: "advanced",
+    problem:
+      "Place a 100-credit Number bet on 17, force the result to 17, spin through the UI, then independently read GET /api/casino/roulette/state and GET /api/casino/roulette/history and prove the UI's displayed balance/payout and the API's balance/profit/payout all agree with each other and with the accounting model (profit 3500, payout 3600, balance 4500 from a starting 1000).",
+    starter: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('UI and API agree on the full payout lifecycle', async ({ page, roulettePage }) => {
+  await roulettePage.open();
+  // TODO: place, force, spin, then cross-check UI against /state and /history
+});`,
+    solution: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('UI and API agree on the full payout lifecycle', async ({ page, roulettePage }) => {
+  await roulettePage.open();
+  await roulettePage.placeBetOf('number', 100, 17);
+  await roulettePage.forceResult(17);
+  await roulettePage.spin();
+
+  await expect(roulettePage.balance).toHaveText('4,500 credits');
+  await expect(roulettePage.payout).toHaveText('3600');
+
+  const state = await page.request.get('/api/casino/roulette/state').then((r) => r.json());
+  expect(state.balance).toBe(4500);
+
+  const history = await page.request.get('/api/casino/roulette/history').then((r) => r.json());
+  const round = history.history[0];
+  expect(round.profit).toBe(3500);
+  expect(round.payout).toBe(3600);
+});`,
+    hints: [
+      "The UI shows payout (3600), not profit (3500) — don't mix them up when asserting.",
+      "Read /history for the settled round's own profit/payout fields, independent of what /state's summary shows.",
+    ],
+    explanation:
+      "A UI-only or API-only check each have a blind spot the other doesn't share. Checking both, plus the accounting model's own arithmetic, is what actually proves the lifecycle end to end.",
+  }),
+  local({
+    id: "cr-ch-network-no-double-deduction",
+    title: "Simulate a failed spin and verify no duplicate balance deduction",
+    track: "Casino",
+    difficulty: "expert",
+    problem:
+      "Place a bet, then use page.route to make POST /api/casino/roulette/spin fail (abort or 500) before it reaches the real server. Verify that GET /api/casino/roulette/state afterward shows exactly one stake deduction — never a double deduction, and never a phantom credit.",
+    starter: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('a failed spin request never double-deducts the balance', async ({ page, roulettePage }) => {
+  await roulettePage.open();
+  // TODO: read balance, place a bet, mock spin to fail, verify balance afterward
+});`,
+    solution: `import { test, expect } from '../../../playwright/fixtures/test';
+
+test('a failed spin request never double-deducts the balance', async ({ page, roulettePage }) => {
+  await roulettePage.open();
+  const before = await page.request.get('/api/casino/roulette/state').then((r) => r.json());
+
+  await roulettePage.placeBetOf('black', 100);
+  await page.route('**/api/casino/roulette/spin', (route) => route.abort('failed'));
+  await roulettePage.spin();
+  await page.unroute('**/api/casino/roulette/spin');
+
+  const after = await page.request.get('/api/casino/roulette/state').then((r) => r.json());
+  expect(after.balance).toBe(before.balance - 100);
+});`,
+    hints: [
+      "The stake is deducted server-side at bet placement — the spin failing client-side shouldn't touch the balance at all.",
+      "Always read real, unmocked state afterward — the mocked response itself proves nothing about the server.",
+      "Remember to page.unroute before your final assertion's request.",
+    ],
+    explanation:
+      "This is the exact shape of the 'network failure incorrectly deducts balance' defect class — and the reason the test reads real state afterward instead of trusting the mock.",
+  }),
+  local({
+    id: "cr-ch-regression-design",
+    title: "Lead-level: design a regression suite for the roulette betting lifecycle",
+    track: "Casino",
+    difficulty: "expert",
+    problem:
+      "Without writing code, design (as a short written plan) a regression suite for the roulette betting lifecycle: list the test categories you'd include (functional, negative, boundary, state, API, database, concurrency, network, accessibility), which ones you'd run on every commit versus on a schedule, and which one or two categories you'd prioritize first if you could only ship half the suite this sprint — and why.",
+    hints: [
+      "Prioritize by financial/regulatory risk for this domain, not by how easy each category is to automate.",
+      "Some categories (ledger reconciliation) suit a scheduled run better than a per-commit one — say which, and why.",
+      "A good answer names concrete examples from this module for each category, not just the category name.",
+    ],
+    explanation:
+      "See the 'Casino Regression Strategy' lesson's model answer: money-moving and state-machine/concurrency coverage first, ledger reconciliation on a schedule, UI polish last — because that ordering follows the platform's actual risk, not test-writing convenience.",
+  }),
+];
+
+export const challenges: Challenge[] = [...playgroundChallenges, ...localChallenges, ...igamingChallenges, ...casinoChallenges];
 
 export const challengeTracks = Array.from(
   challenges.reduce((map, challenge) => {

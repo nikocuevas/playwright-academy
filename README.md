@@ -27,6 +27,7 @@ data-validation exercises.
 - [Practice applications](#practice-applications)
 - [SQL for Testers](#sql-for-testers)
 - [iGaming QA Track](#igaming-qa-track)
+- [🎰 Casino QA Lab](#-casino-qa-lab)
 - [UI / API / database validation](#ui--api--database-validation)
 - [Technology stack](#technology-stack)
 - [Architecture](#architecture)
@@ -57,18 +58,20 @@ operate:
 
 | Surface | What it is |
 | --- | --- |
-| **Curriculum** | 17 modules, 92 lessons, 113 quiz questions (~17+ hours), including an iGaming QA specialization |
+| **Curriculum** | 18 modules, 104 lessons, 127 quiz questions (~18+ hours), including an iGaming QA specialization and a Casino QA Lab |
 | **Playwright Playground** | A Playwright interpreter that runs your code against a simulated browser |
 | **Registration app** | A form with regenerated ids and full client-side validation |
 | **ShopEasy** | A complete e-commerce app — login, cart, checkout, orders, messaging |
 | **SQL Lab** | An in-browser SQL engine over a seven-table dataset with seeded data bugs |
 | **iGaming practice app** | A small simulated gambling app — wallet, bets, settlement, responsible gambling |
 | **iGaming SQL Lab** | The same SQL engine over a separate 13-table synthetic gambling-platform dataset |
-| **Challenges** | 32 exercises, 14 of them runnable in the playground |
+| **Casino Roulette app** | A playable European Roulette game with a deterministic, test-only result mechanism |
+| **Casino SQL Lab** | The same SQL engine again, over a separate 4-table roulette ledger with seeded bugs |
+| **Challenges** | 37 exercises, 14 of them runnable in the playground |
 | **Capstone** | A 12-part brief to build a production-shaped automation framework |
 | **Reference** | 31 API entries, 10 cheat sheets, 53 glossary terms, a decision helper |
 
-The repository also contains a **real Playwright suite** (168 tests) that runs
+The repository also contains a **real Playwright suite** (263 tests) that runs
 against the practice applications with `npx playwright test`.
 
 ---
@@ -393,6 +396,65 @@ The track also adds 12 challenges (filterable under the "iGaming" tab on
   realistic sample defects (duplicate wallet credit, negative balance,
   duplicate settlement, self-excluded player able to bet, and more), written
   as real bug reports
+
+---
+
+## 🎰 Casino QA Lab
+
+A second, more focused casino specialization (Module 18) built around one
+real, playable game: **European Roulette**, with a virtual 1,000-credit
+starting balance. Where the iGaming track is broad (a whole platform's worth
+of domains), this one is deep on a single game — specifically so it can
+teach the techniques a UI-only test suite never touches.
+
+Purely virtual credits throughout — no real currency, no payment processing,
+no real gambling functionality of any kind.
+
+What you'll practice:
+
+- **UI automation** — reliable, semantic locators (`getByRole`/`getByLabel`)
+  over seven bet types, with `data-testid`s reserved for the handful of
+  elements semantic locators can't reach
+- **API testing** — the full `/api/casino/roulette/*` contract, status codes
+  and validation errors, not just the 200 path
+- **Deterministic testing of random behavior** — `POST .../test-result`
+  forces the next spin's outcome, so every test asserts a known result
+  instead of hoping the wheel cooperates; it's header-gated and unreachable
+  from the shipped UI, documented in full in
+  [`docs/casino-roulette-architecture.md`](docs/casino-roulette-architecture.md)
+- **Network interception** — mocking server errors, malformed responses,
+  timeouts and duplicate requests with `page.route`, and proving a failed
+  request never double-deducts the balance
+- **Race-condition testing** — a genuine `Promise.all` concurrency test
+  proving two simultaneous spin (or bet) requests can never double-process
+  a round or double-spend a balance
+- **Balance, payout and ledger validation** — an explicit, documented
+  accounting model (stake deducted at bet placement; `profit` is the net
+  gain; `payout` is the total credited back, i.e. stake + profit) so you
+  know exactly what to assert
+- **SQL/database validation** — a separate 4-table roulette ledger
+  (`players`, `rounds`, `bets`, `transactions`) with seven seeded
+  reconciliation bugs
+- **Bug hunting** — [`docs/casino-bug-hunt.md`](docs/casino-bug-hunt.md)
+  documents all ten seeded/scenario bugs: seven live and queryable in the
+  Casino SQL Lab, and three live-behavior scenarios (UI/API balance drift,
+  a stale bet-history status, a double-clicked Spin button) taught as a
+  realistic before/after code comparison plus a "write the test that would
+  catch this" exercise, rather than wired as a toggleable bug into the
+  shipped app
+
+**[`/practice/casino-roulette`](/practice/casino-roulette)** — the game
+itself. **[`/practice/casino-roulette-sql`](/practice/casino-roulette-sql)**
+— its SQL Lab. Both reuse this repository's existing practice-app and SQL
+Lab patterns; the SQL Lab reuses the exact same in-browser SQL engine as the
+ShopEasy and iGaming labs, over its own dataset.
+
+The module adds 12 lessons (Casino QA Fundamentals through Casino Regression
+Strategy) and 5 challenges spanning beginner to lead-level (filterable under
+the "Casino" tab on [`/challenges`](/challenges)). See
+[`docs/casino-roulette-architecture.md`](docs/casino-roulette-architecture.md)
+for the UI → API → game engine → persistence → transaction-history layering
+and why each layer is tested separately.
 
 ---
 

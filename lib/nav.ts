@@ -1,6 +1,7 @@
 import {
   BookOpen,
   Braces,
+  CircleDot,
   Database,
   Dices,
   FlaskConical,
@@ -95,6 +96,18 @@ export const navGroups: NavGroup[] = [
         label: "iGaming SQL Lab",
         icon: Dices,
         description: "Query a 13-table synthetic gambling-platform dataset for ledger and compliance bugs",
+      },
+      {
+        href: "/practice/casino-roulette",
+        label: "Casino Roulette",
+        icon: CircleDot,
+        description: "European Roulette with a deterministic test mode — virtual credits only",
+      },
+      {
+        href: "/practice/casino-roulette-sql",
+        label: "Casino SQL Lab",
+        icon: CircleDot,
+        description: "Query a 4-table roulette ledger for payout and reconciliation bugs",
       },
     ],
   },
