@@ -16,6 +16,7 @@ import { e2eModule } from "./module-13-e2e";
 import { debuggingModule } from "./module-14-debugging";
 import { sqlModule } from "./module-15-sql";
 import { capstoneModule } from "./module-16-capstone";
+import { igamingModule } from "./module-17-igaming";
 
 export const modules: Module[] = [
   jsTsModule,
@@ -34,6 +35,7 @@ export const modules: Module[] = [
   debuggingModule,
   sqlModule,
   capstoneModule,
+  igamingModule,
 ].sort((a, b) => a.order - b.order);
 
 export const allLessons: Lesson[] = modules.flatMap((m) => m.lessons);

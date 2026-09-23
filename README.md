@@ -26,6 +26,7 @@ data-validation exercises.
 - [Interactive Playwright Playground](#interactive-playwright-playground)
 - [Practice applications](#practice-applications)
 - [SQL for Testers](#sql-for-testers)
+- [iGaming QA Track](#igaming-qa-track)
 - [UI / API / database validation](#ui--api--database-validation)
 - [Technology stack](#technology-stack)
 - [Architecture](#architecture)
@@ -56,16 +57,18 @@ operate:
 
 | Surface | What it is |
 | --- | --- |
-| **Curriculum** | 16 modules, 70 lessons, 88 quiz questions (~16 hours) |
+| **Curriculum** | 17 modules, 92 lessons, 113 quiz questions (~17+ hours), including an iGaming QA specialization |
 | **Playwright Playground** | A Playwright interpreter that runs your code against a simulated browser |
 | **Registration app** | A form with regenerated ids and full client-side validation |
 | **ShopEasy** | A complete e-commerce app — login, cart, checkout, orders, messaging |
 | **SQL Lab** | An in-browser SQL engine over a seven-table dataset with seeded data bugs |
-| **Challenges** | 20 exercises, 14 of them runnable in the playground |
+| **iGaming practice app** | A small simulated gambling app — wallet, bets, settlement, responsible gambling |
+| **iGaming SQL Lab** | The same SQL engine over a separate 13-table synthetic gambling-platform dataset |
+| **Challenges** | 32 exercises, 14 of them runnable in the playground |
 | **Capstone** | A 12-part brief to build a production-shaped automation framework |
-| **Reference** | 31 API entries, 10 cheat sheets, 30 glossary terms, a decision helper |
+| **Reference** | 31 API entries, 10 cheat sheets, 53 glossary terms, a decision helper |
 
-The repository also contains a **real Playwright suite** (136 tests) that runs
+The repository also contains a **real Playwright suite** (168 tests) that runs
 against the practice applications with `npx playwright test`.
 
 ---
@@ -331,6 +334,65 @@ FROM orders o
 JOIN payments p ON p.order_id = o.id
 WHERE o.status = 'cancelled' AND p.status = 'completed';
 ```
+
+---
+
+## iGaming QA Track
+
+Playwright Academy also includes an **iGaming QA & Online Gambling Testing**
+specialization (Module 17) for QA engineers moving into — or progressing
+toward a QA Engineering Lead role on — an online gambling platform. It's
+additive to the rest of the curriculum: nothing above it changed to make room
+for it.
+
+Everything in this track uses **synthetic data only** — fictional players,
+fake currency, simulated bets, simulated KYC/geolocation providers. Nothing
+connects to a real gambling operator, a real payment provider, or a
+real-money account.
+
+The track covers:
+
+- **Domain**: registration & account lifecycle, KYC & age verification,
+  geolocation, wallets, deposits & withdrawals, betting & bet placement,
+  casino/game testing, settlement & payouts, bonuses, responsible gambling,
+  self-exclusion, risk & fraud
+- **Engineering**: API testing for iGaming endpoints, database/ledger
+  validation, events & message flows, concurrency & race conditions,
+  idempotency & duplicate transactions, end-to-end strategy, risk-based test
+  strategy, and a QA Engineering Lead perspective lesson
+
+**`/practice/igaming`** — a small simulated gambling app (login, wallet, bet
+placement against fixed fictional markets, settlement, transaction history,
+and a responsible-gambling deposit limit), intentionally kept small, in the
+same style as the Registration and ShopEasy practice apps.
+
+**`/practice/igaming-sql`** — the same in-browser SQL engine as the SQL Lab
+above, over a separate 13-table synthetic gambling-platform dataset
+(`players`, `wallets`, `transactions`, `bets`, `bet_settlements`, `games`,
+`game_sessions`, `bonuses`, `kyc_verifications`,
+`responsible_gambling_limits`, `self_exclusions`, `risk_assessments`,
+`audit_logs`) seeded with ten deliberate reconciliation and compliance bugs
+for the QA validation exercises to find — a negative balance, a duplicated
+transaction, a settled bet with no settlement record, a win with no payout
+transaction, a wallet that doesn't reconcile, a self-excluded player who
+still placed a bet, a failed-KYC player who still gambled, a payment callback
+applied twice, and a transaction that disagrees with the bet it funds.
+
+The track also adds 12 challenges (filterable under the "iGaming" tab on
+`/challenges`), 23 terms to the glossary, and three companion documents:
+
+- [`docs/igaming-testing.md`](docs/igaming-testing.md) — the iGaming QA
+  strategy: test pyramid, critical flows, risk-based testing, UI vs API vs
+  database vs ledger validation, concurrency, and release/production
+  validation
+- [`docs/igaming-test-cases.md`](docs/igaming-test-cases.md) — a catalog of
+  100+ concrete test scenarios across authentication, KYC, geolocation,
+  wallet, betting, casino, settlement, bonuses, responsible gambling,
+  risk/fraud, API, database and concurrency
+- [`docs/igaming-sample-defects.md`](docs/igaming-sample-defects.md) — ten
+  realistic sample defects (duplicate wallet credit, negative balance,
+  duplicate settlement, self-excluded player able to bet, and more), written
+  as real bug reports
 
 ---
 

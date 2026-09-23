@@ -4,6 +4,7 @@ import { cheatSheets } from "@/content/cheat-sheets";
 import { glossary } from "@/content/glossary";
 import { challenges } from "@/content/challenges";
 import { sqlExercises } from "@/content/sql-exercises";
+import { igamingSqlExercises } from "@/content/igaming-sql-exercises";
 import { scenarios } from "@/lib/playwright-simulator/scenarios";
 
 export type SearchKind =
@@ -110,6 +111,17 @@ function build(): SearchDoc[] {
       subtitle: exercise.prompt,
       href: `/practice/sql?exercise=${exercise.id}`,
       keywords: `${exercise.title} ${exercise.prompt} ${exercise.group} sql`.toLowerCase(),
+    });
+  }
+
+  for (const exercise of igamingSqlExercises) {
+    docs.push({
+      id: `igaming-sql:${exercise.id}`,
+      kind: "SQL exercise",
+      title: exercise.title,
+      subtitle: exercise.prompt,
+      href: `/practice/igaming-sql?exercise=${exercise.id}`,
+      keywords: `${exercise.title} ${exercise.prompt} ${exercise.group} igaming sql`.toLowerCase(),
     });
   }
 
