@@ -17,6 +17,7 @@ import { debuggingModule } from "./module-14-debugging";
 import { sqlModule } from "./module-15-sql";
 import { capstoneModule } from "./module-16-capstone";
 import { igamingModule } from "./module-17-igaming";
+import { casinoRouletteModule } from "./module-18-casino-roulette";
 
 export const modules: Module[] = [
   jsTsModule,
@@ -36,6 +37,7 @@ export const modules: Module[] = [
   sqlModule,
   capstoneModule,
   igamingModule,
+  casinoRouletteModule,
 ].sort((a, b) => a.order - b.order);
 
 export const allLessons: Lesson[] = modules.flatMap((m) => m.lessons);

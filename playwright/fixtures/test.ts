@@ -7,6 +7,7 @@ import { CheckoutPage } from "../pages/CheckoutPage";
 import { OrdersPage } from "../pages/OrdersPage";
 import { MessagesPage } from "../pages/MessagesPage";
 import { IgamingPage } from "../pages/IgamingPage";
+import { RoulettePage } from "../pages/RoulettePage";
 
 /**
  * Page objects exposed as fixtures.
@@ -23,6 +24,7 @@ type Fixtures = {
   ordersPage: OrdersPage;
   messagesPage: MessagesPage;
   igamingPage: IgamingPage;
+  roulettePage: RoulettePage;
   /** A page whose cart already contains one Wireless Headphones. */
   cartWithHeadphones: Page;
 };
@@ -51,6 +53,9 @@ export const test = base.extend<Fixtures>({
   },
   igamingPage: async ({ page }, use) => {
     await use(new IgamingPage(page));
+  },
+  roulettePage: async ({ page }, use) => {
+    await use(new RoulettePage(page));
   },
 
   cartWithHeadphones: async ({ page }, use) => {
